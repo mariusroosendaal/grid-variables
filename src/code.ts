@@ -16,6 +16,12 @@ async function initializePlugin() {
 initializePlugin();
 
 figma.ui.onmessage = async (msg) => {
+	// --- Handle resize from UI ---
+	if (msg.type === 'resize') {
+		figma.ui.resize(msg.width, msg.height);
+		return;
+	}
+
 	// --- Grid Calculation (Unchanged) ---
 	if (msg.type === 'calculate-grid') {
 		const { maxWidth, columns, gutter, margin } = msg.data;

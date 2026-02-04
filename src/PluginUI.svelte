@@ -1,4 +1,5 @@
 <script>
+  import { onMount, onDestroy } from "svelte";
   import { Button, Checkbox, Dropdown, Input, Label, Text } from "figma-ui3-kit-svelte";
   import {
     PluginLayout,
@@ -6,7 +7,15 @@
     Footer,
     sendToPlugin,
     createMessageHandler,
+    autoResize,
   } from "figma-plugin-utils";
+
+  // Auto-resize plugin window to fit content
+  let cleanupResize;
+  onMount(() => {
+    cleanupResize = autoResize({ width: 280, minHeight: 200, maxHeight: 600 });
+  });
+  onDestroy(() => cleanupResize?.());
 
   // Inputs
   let maxWidth = "1366";
