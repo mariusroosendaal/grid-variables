@@ -2,7 +2,6 @@
   import { onMount, onDestroy } from "svelte";
   import { Button, Checkbox, Dropdown, Input, Label, Text } from "figma-ui3-kit-svelte";
   import {
-    PluginLayout,
     FieldGroup,
     Footer,
     sendToPlugin,
@@ -11,9 +10,10 @@
   } from "figma-plugin-utils";
 
   // Auto-resize plugin window to fit content
+  let wrapperEl;
   let cleanupResize;
   onMount(() => {
-    cleanupResize = autoResize({ width: 280, minHeight: 200, maxHeight: 600 });
+    cleanupResize = autoResize({ width: 280, minHeight: 200, maxHeight: 600, container: wrapperEl });
   });
   onDestroy(() => cleanupResize?.());
 
@@ -89,8 +89,8 @@
   }
 </script>
 
-<div class="plugin-container">
-  <PluginLayout>
+<div class="wrapper" bind:this={wrapperEl}>
+  <div class="main">
     <section class="section">
       <div class="grid-inputs">
         <FieldGroup label="Max width (px)">
@@ -146,7 +146,7 @@
 
       <Checkbox bind:checked={generateFrame}>Generate frame</Checkbox>
     </section>
-  </PluginLayout>
+  </div>
 
   <Footer variant="full">
     <Button variant="primary" on:click={handleGenerate} fullWidth>
@@ -156,10 +156,18 @@
 </div>
 
 <style>
-  .plugin-container {
-    height: 100%;
+  .wrapper {
+    color: var(--figma-color-text);
+    font-family: var(--figma-font-stack);
     display: flex;
     flex-direction: column;
+  }
+
+  .main {
+    padding: var(--size-xxsmall);
+    display: flex;
+    flex-direction: column;
+    gap: var(--size-xxsmall);
   }
 
   .section {
@@ -189,6 +197,6 @@
   hr {
     border: none;
     border-top: 1px solid var(--figma-color-border);
-    margin: var(--size-xsmall) 0;
+    margin: var(--size-xxxsmall) 0;
   }
 </style>
