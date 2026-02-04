@@ -1,12 +1,12 @@
 <script>
+  import { Button, Checkbox, Dropdown, Input, Label, Text } from "figma-ui3-kit-svelte";
   import {
-    Button,
-    Checkbox,
-    Dropdown,
-    Input,
-    Label,
-    Text,
-  } from "figma-ui3-kit-svelte";
+    PluginLayout,
+    FieldGroup,
+    Footer,
+    sendToPlugin,
+    createMessageHandler,
+  } from "figma-plugin-utils";
 
   // Inputs
   let maxWidth = "1366";
@@ -32,54 +32,38 @@
   }));
 
   function calculateGrid() {
-    parent.postMessage(
-      {
-        pluginMessage: {
-          type: "calculate-grid",
-          data: {
-            maxWidth: parseInt(maxWidth) || 0,
-            columns: parseInt(columns) || 0,
-            gutter: parseInt(gutter) || 0,
-            margin: parseInt(margin) || 0,
-          },
-        },
+    sendToPlugin("calculate-grid", {
+      data: {
+        maxWidth: parseInt(maxWidth) || 0,
+        columns: parseInt(columns) || 0,
+        gutter: parseInt(gutter) || 0,
+        margin: parseInt(margin) || 0,
       },
-      "*",
-    );
+    });
   }
 
   function handleGenerate() {
-    parent.postMessage(
-      {
-        pluginMessage: {
-          type: "generate-actions",
-          data: {
-            collectionId: selectedCollection?.value || "",
-            breakpoint: breakpoint || "default",
-            viewport: parseInt(maxWidth) || 0,
-            columns: parseInt(columns) || 0,
-            margin: parseInt(margin) || 0,
-            gutter: parseInt(gutter) || 0,
-            generateVariables,
-            generateFrame,
-          },
-        },
+    sendToPlugin("generate-actions", {
+      data: {
+        collectionId: selectedCollection?.value || "",
+        breakpoint: breakpoint || "default",
+        viewport: parseInt(maxWidth) || 0,
+        columns: parseInt(columns) || 0,
+        margin: parseInt(margin) || 0,
+        gutter: parseInt(gutter) || 0,
+        generateVariables,
+        generateFrame,
       },
-      "*",
-    );
+    });
   }
 
-  window.onmessage = (event) => {
-    const msg = event.data?.pluginMessage;
-    if (!msg) return;
-
-    if (msg.type === "grid-results") {
+  window.onmessage = createMessageHandler({
+    "grid-results": (msg) => {
       calculatedWidth = `${msg.data.calculatedPageWidth}px`;
       columnWidth = `${msg.data.columnWidth}px`;
       resultColor = msg.data.color || "";
-    }
-
-    if (msg.type === "load-collections") {
+    },
+    "load-collections": (msg) => {
       collections = msg.data || [];
       if (collections.length > 0) {
         selectedCollection = {
@@ -87,8 +71,8 @@
           value: collections[0].id,
         };
       }
-    }
-  };
+    },
+  });
 
   // Calculate on mount and when inputs change
   $: if (maxWidth || columns || gutter || margin) {
@@ -96,26 +80,22 @@
   }
 </script>
 
-<div class="wrapper">
-  <div class="main">
+<div class="plugin-container">
+  <PluginLayout>
     <section class="section">
       <div class="grid-inputs">
-        <div class="field">
-          <Label>Max width (px)</Label>
+        <FieldGroup label="Max width (px)">
           <Input type="number" bind:value={maxWidth} />
-        </div>
-        <div class="field">
-          <Label>Columns</Label>
+        </FieldGroup>
+        <FieldGroup label="Columns">
           <Input type="number" bind:value={columns} />
-        </div>
-        <div class="field">
-          <Label>Margin (px)</Label>
+        </FieldGroup>
+        <FieldGroup label="Margin (px)">
           <Input type="number" bind:value={margin} />
-        </div>
-        <div class="field">
-          <Label>Gutter (px)</Label>
+        </FieldGroup>
+        <FieldGroup label="Gutter (px)">
           <Input type="number" bind:value={gutter} />
-        </div>
+        </FieldGroup>
       </div>
     </section>
 
@@ -137,48 +117,40 @@
     <hr />
 
     <section class="section">
-      <div class="field">
-        <Label>Breakpoint/Group</Label>
+      <FieldGroup label="Breakpoint/Group">
         <Input bind:value={breakpoint} placeholder="grid/xl" />
-      </div>
+      </FieldGroup>
 
       <Checkbox bind:checked={generateVariables}>
         Generate/update variables
       </Checkbox>
 
       {#if generateVariables}
-        <div class="field">
-          <Label>Collection</Label>
+        <FieldGroup label="Collection">
           <Dropdown
             menuItems={collectionOptions}
             bind:value={selectedCollection}
             placeholder="Select collection"
           />
-        </div>
+        </FieldGroup>
       {/if}
 
       <Checkbox bind:checked={generateFrame}>Generate frame</Checkbox>
     </section>
-  </div>
+  </PluginLayout>
 
-  <footer>
+  <Footer variant="full">
     <Button variant="primary" on:click={handleGenerate} fullWidth>
       Generate
     </Button>
-  </footer>
+  </Footer>
 </div>
 
 <style>
-  .wrapper {
+  .plugin-container {
     height: 100%;
     display: flex;
     flex-direction: column;
-  }
-
-  .main {
-    flex: 1;
-    padding: var(--size-xxsmall);
-    overflow-y: auto;
   }
 
   .section {
@@ -191,12 +163,6 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--size-xxsmall);
-  }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: var(--size-xxxsmall);
   }
 
   .results {
@@ -215,10 +181,5 @@
     border: none;
     border-top: 1px solid var(--figma-color-border);
     margin: var(--size-xsmall) 0;
-  }
-
-  footer {
-    padding: var(--size-xxsmall);
-    border-top: 1px solid var(--figma-color-border);
   }
 </style>
