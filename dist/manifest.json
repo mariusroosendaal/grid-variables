@@ -1,0 +1,12 @@
+{
+  "name": "Grid Variable Generator",
+  "id": "1547186853289230831",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "index.html",
+  "networkAccess": { "allowedDomains": ["none"] },
+  "documentAccess": "dynamic-page",
+  "editorType": [
+    "figma" 
+  ]
+}
