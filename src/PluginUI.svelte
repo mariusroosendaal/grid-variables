@@ -1,5 +1,12 @@
 <script>
-  import { Button, Checkbox, Dropdown, Input, Label, Text } from "figma-ui3-kit-svelte";
+  import {
+    Button,
+    Checkbox,
+    Dropdown,
+    Input,
+    Label,
+    Text,
+  } from "figma-ui3-kit-svelte";
   import {
     PluginLayout,
     FieldGroup,
