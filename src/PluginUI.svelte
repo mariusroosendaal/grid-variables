@@ -117,7 +117,7 @@
     <hr />
 
     <section class="section">
-      <FieldGroup label="Breakpoint/Group">
+      <FieldGroup label="Breakpoint/group">
         <Input bind:value={breakpoint} placeholder="grid/xl" />
       </FieldGroup>
 
