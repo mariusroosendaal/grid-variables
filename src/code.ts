@@ -194,7 +194,17 @@ figma.ui.onmessage = async (msg) => {
   }
 };
 
-async function createGridFrame(params) {
+interface GridFrameParams {
+  breakpoint: string;
+  columns: number;
+  variables: Map<string, Variable> | null;
+  width: number;
+  margin: number;
+  gutter: number;
+  roundedColWidth: number;
+}
+
+async function createGridFrame(params: GridFrameParams) {
   const {
     breakpoint,
     columns,
@@ -220,12 +230,12 @@ async function createGridFrame(params) {
   if (variables) {
     // BOUND MODE: Use setBoundVariable
     frame.counterAxisSizingMode = "FIXED";
-    frame.setBoundVariable("width", variables.get("viewport"));
-    frame.setBoundVariable("paddingLeft", variables.get("margin"));
-    frame.setBoundVariable("paddingRight", variables.get("margin"));
-    frame.setBoundVariable("paddingTop", variables.get("margin"));
-    frame.setBoundVariable("paddingBottom", variables.get("margin"));
-    frame.setBoundVariable("itemSpacing", variables.get("gutter"));
+    frame.setBoundVariable("width", variables.get("viewport")!);
+    frame.setBoundVariable("paddingLeft", variables.get("margin")!);
+    frame.setBoundVariable("paddingRight", variables.get("margin")!);
+    frame.setBoundVariable("paddingTop", variables.get("margin")!);
+    frame.setBoundVariable("paddingBottom", variables.get("margin")!);
+    frame.setBoundVariable("itemSpacing", variables.get("gutter")!);
   } else {
     // STATIC MODE: Use raw number values
     frame.resize(width, frame.height);
@@ -244,15 +254,16 @@ async function createGridFrame(params) {
       alignment: "STRETCH",
       count: columns,
       color: { ...gridColor, a: 0.08 },
-      gutterSize: variables.get("gutter").resolveForConsumer(frame)
+      gutterSize: variables.get("gutter")!.resolveForConsumer(frame)
         .value as number,
-      offset: variables.get("margin").resolveForConsumer(frame).value as number,
+      offset: variables.get("margin")!.resolveForConsumer(frame)
+        .value as number,
       boundVariables: {
         gutterSize: figma.variables.createVariableAlias(
-          variables.get("gutter"),
+          variables.get("gutter")!,
         ),
-        offset: figma.variables.createVariableAlias(variables.get("margin")),
-        count: figma.variables.createVariableAlias(variables.get("columns")),
+        offset: figma.variables.createVariableAlias(variables.get("margin")!),
+        count: figma.variables.createVariableAlias(variables.get("columns")!),
       },
     };
   } else {
@@ -279,7 +290,7 @@ async function createGridFrame(params) {
     bar.resize(0, 64);
 
     if (variables) {
-      bar.setBoundVariable("width", variables.get(`col-${i}`));
+      bar.setBoundVariable("width", variables.get(`col-${i}`)!);
     } else {
       const spanWidth = i * roundedColWidth + (i - 1) * gutter;
       bar.resize(spanWidth, 64);
