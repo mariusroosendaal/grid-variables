@@ -2,7 +2,7 @@
 // It creates variables and generates a Figma frame bound to those variables.
 
 async function initializePlugin() {
-  figma.showUI(__html__, { themeColors: true, width: 280, height: 470 });
+  figma.showUI(__html__, { themeColors: true, width: 240, height: 470 });
 
   try {
     const collections =
