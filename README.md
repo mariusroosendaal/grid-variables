@@ -30,7 +30,7 @@ The plugin automatically rounds column widths to whole pixels and shows whether 
 - `{group}/gutter` - Gap between columns
 - `{group}/col-1` through `col-{n}` - Span widths for each column span
 
-**Preview frame** - Named with the max width value (e.g., "1366"), with column layout and grid overlay bound to variables if generated together
+**Preview frame** - Named with the max width value (e.g., "1440"), with column layout and grid overlay bound to variables if generated together
 
 ## Development
 
