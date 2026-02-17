@@ -16,9 +16,9 @@
   } from "figma-plugin-utils";
 
   // Inputs
-  let maxWidth = "1366";
+  let maxWidth = "1440";
   let columns = "12";
-  let margin = "32";
+  let margin = "24";
   let gutter = "24";
   let breakpoint = "grid/xl";
 
@@ -85,22 +85,32 @@
   $: if (maxWidth || columns || gutter || margin) {
     calculateGrid();
   }
+
+  // Resize plugin window when variables section expands/collapses
+  $: {
+    const baseHeight = 375;
+    const extraHeight = generateVariables ? 124 : 0;
+    sendToPlugin("resize-window", {
+      data: { height: baseHeight + extraHeight },
+    });
+  }
 </script>
 
 <div class="plugin-container">
   <PluginLayout>
     <section class="section">
+      <Label>Grid</Label>
       <div class="grid-inputs">
-        <FieldGroup label="Max width (px)">
+        <FieldGroup label="Max width" size="small">
           <Input type="number" bind:value={maxWidth} />
         </FieldGroup>
-        <FieldGroup label="Columns">
+        <FieldGroup label="Columns" size="small">
           <Input type="number" bind:value={columns} />
         </FieldGroup>
-        <FieldGroup label="Margin (px)">
+        <FieldGroup label="Margin" size="small">
           <Input type="number" bind:value={margin} />
         </FieldGroup>
-        <FieldGroup label="Gutter (px)">
+        <FieldGroup label="Gutter" size="small">
           <Input type="number" bind:value={gutter} />
         </FieldGroup>
       </div>
@@ -132,6 +142,7 @@
       </Checkbox>
 
       {#if generateVariables}
+        <section class="variables-section">
         <FieldGroup label="Collection">
           <Dropdown
             menuItems={collectionOptions}
@@ -139,9 +150,10 @@
             placeholder="Select collection"
           />
         </FieldGroup>
-        <FieldGroup label="Prefix">
+        <FieldGroup label="Group">
           <Input bind:value={breakpoint} placeholder="grid/xl" />
         </FieldGroup>
+        </section>
       {/if}
 
       <Checkbox bind:checked={generateFrame}>Generate preview frame</Checkbox>
@@ -149,7 +161,12 @@
   </PluginLayout>
 
   <Footer variant="full">
-    <Button variant="primary" on:click={handleGenerate} fullWidth>
+    <Button 
+      variant="primary" 
+      on:click={handleGenerate} 
+      fullWidth
+      disabled={!generateVariables && !generateFrame}
+    >
       Generate
     </Button>
   </Footer>
@@ -167,11 +184,18 @@
     flex-direction: column;
     gap: var(--size-xxsmall);
   }
+  .variables-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--size-xsmall);
+    margin-bottom: var(--size-xxxsmall);
+  }
 
   .grid-inputs {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--size-xxsmall);
+
   }
 
   .results {

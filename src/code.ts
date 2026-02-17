@@ -2,7 +2,7 @@
 // It creates variables and generates a Figma frame bound to those variables.
 
 async function initializePlugin() {
-  figma.showUI(__html__, { themeColors: true, width: 240, height: 470 });
+  figma.showUI(__html__, { themeColors: true, width: 240, height: 380 });
 
   try {
     const collections =
@@ -20,6 +20,12 @@ async function initializePlugin() {
 initializePlugin();
 
 figma.ui.onmessage = async (msg) => {
+  // --- Window Resize ---
+  if (msg.type === "resize-window") {
+    figma.ui.resize(240, msg.data.height);
+    return;
+  }
+
   // --- Grid Calculation (Unchanged) ---
   if (msg.type === "calculate-grid") {
     const { maxWidth, columns, gutter, margin } = msg.data;
@@ -154,8 +160,9 @@ figma.ui.onmessage = async (msg) => {
         variablesWereModified = true;
         notificationMessage =
           existingVariablesInGroup.length > 0
-            ? "✅ Synced variables!"
-            : "✅ Created variables!";
+            ? "Variables synced!"
+            : "Variables created!";
+        figma.notify(notificationMessage);
 
         //
       }
@@ -176,13 +183,10 @@ figma.ui.onmessage = async (msg) => {
           roundedColWidth,
         });
 
-        notificationMessage = variablesWereModified
-          ? notificationMessage + " And generated a frame!"
-          : "✅ Generated a frame!";
+        figma.notify("Frame generated!");
       }
 
-      if (notificationMessage) {
-        figma.notify(notificationMessage);
+      if (generateVariables || generateFrame) {
         figma.closePlugin();
       }
     } catch (error) {
@@ -216,7 +220,7 @@ async function createGridFrame(params: GridFrameParams) {
   } = params;
 
   const frame = figma.createFrame();
-  frame.name = `${breakpoint}`;
+  frame.name = `${width}`;
   frame.layoutMode = "VERTICAL";
   frame.primaryAxisSizingMode = "AUTO";
 
