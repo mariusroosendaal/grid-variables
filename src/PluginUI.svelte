@@ -111,7 +111,7 @@
     <section class="section results">
       <div class="result">
         <Label>Calculated width</Label>
-        <Text variant="body-medium" style="color: {resultColor}">
+        <Text variant="body-medium" color={resultColor}>
           {calculatedWidth}
         </Text>
       </div>
@@ -123,13 +123,12 @@
 
     <hr />
 
-    <section class="section">
-      <FieldGroup label="Breakpoint/group">
-        <Input bind:value={breakpoint} placeholder="grid/xl" />
-      </FieldGroup>
 
+    <section class="section">
+      <Label>Output</Label>
+      
       <Checkbox bind:checked={generateVariables}>
-        Generate/update variables
+        Save to variable collection
       </Checkbox>
 
       {#if generateVariables}
@@ -140,9 +139,12 @@
             placeholder="Select collection"
           />
         </FieldGroup>
+        <FieldGroup label="Prefix">
+          <Input bind:value={breakpoint} placeholder="grid/xl" />
+        </FieldGroup>
       {/if}
 
-      <Checkbox bind:checked={generateFrame}>Generate frame</Checkbox>
+      <Checkbox bind:checked={generateFrame}>Generate preview frame</Checkbox>
     </section>
   </PluginLayout>
 
@@ -173,20 +175,20 @@
   }
 
   .results {
-    flex-direction: row;
-    gap: var(--size-xsmall);
+    flex-direction: column;
+    gap: var(--size-xxsmall);
   }
 
   .result {
     flex: 1;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: var(--size-xxxsmall);
   }
 
   hr {
     border: none;
     border-top: 1px solid var(--figma-color-border);
-    margin: var(--size-xsmall) 0;
+    margin: 0 -16px;
   }
 </style>
