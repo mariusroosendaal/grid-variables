@@ -89,7 +89,7 @@
   // Resize plugin window when variables section expands/collapses
   $: {
     const baseHeight = 375;
-    const extraHeight = generateVariables ? 124 : 0;
+    const extraHeight = generateVariables ? 104 : 0;
     sendToPlugin("resize-window", {
       data: { height: baseHeight + extraHeight },
     });
@@ -133,26 +133,25 @@
 
     <hr />
 
-
     <section class="section">
       <Label>Output</Label>
-      
+
       <Checkbox bind:checked={generateVariables}>
         Save to variable collection
       </Checkbox>
 
       {#if generateVariables}
-        <section class="variables-section">
-        <FieldGroup label="Collection">
-          <Dropdown
-            menuItems={collectionOptions}
-            bind:value={selectedCollection}
-            placeholder="Select collection"
-          />
-        </FieldGroup>
-        <FieldGroup label="Group">
-          <Input bind:value={breakpoint} placeholder="grid/xl" />
-        </FieldGroup>
+        <section class="section variables-section">
+          <FieldGroup label="Collection" size="small">
+            <Dropdown
+              menuItems={collectionOptions}
+              bind:value={selectedCollection}
+              placeholder="Select collection"
+            />
+          </FieldGroup>
+          <FieldGroup label="Group" size="small">
+            <Input bind:value={breakpoint} placeholder="grid/xl" />
+          </FieldGroup>
         </section>
       {/if}
 
@@ -161,9 +160,9 @@
   </PluginLayout>
 
   <Footer variant="full">
-    <Button 
-      variant="primary" 
-      on:click={handleGenerate} 
+    <Button
+      variant="primary"
+      on:click={handleGenerate}
       fullWidth
       disabled={!generateVariables && !generateFrame}
     >
@@ -185,9 +184,6 @@
     gap: var(--size-xxsmall);
   }
   .variables-section {
-    display: flex;
-    flex-direction: column;
-    gap: var(--size-xsmall);
     margin-bottom: var(--size-xxxsmall);
   }
 
@@ -195,7 +191,6 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--size-xxsmall);
-
   }
 
   .results {

@@ -187,7 +187,7 @@ figma.ui.onmessage = async (msg) => {
       }
 
       if (generateVariables || generateFrame) {
-        figma.closePlugin();
+        // figma.closePlugin(); // Uncomment this to close the plugin after generation
       }
     } catch (error) {
       console.error("Error during generation:", error);
