@@ -77,7 +77,6 @@ figma.ui.onmessage = async (msg) => {
 
     let createdOrUpdatedVariables: Map<string, Variable> | null = null;
     let notificationMessage = "";
-    let variablesWereModified = false;
 
     try {
       // --- ACTION 1: Generate or Update Variables (Conditional) ---
@@ -157,7 +156,6 @@ figma.ui.onmessage = async (msg) => {
           }
         }
 
-        variablesWereModified = true;
         notificationMessage =
           existingVariablesInGroup.length > 0
             ? "Variables synced!"
@@ -174,7 +172,6 @@ figma.ui.onmessage = async (msg) => {
         const finalCalculatedWidth =
           roundedColWidth * columns + totalGutterW + totalMarginW;
         await createGridFrame({
-          breakpoint,
           columns,
           variables: createdOrUpdatedVariables,
           width: finalCalculatedWidth,
@@ -199,7 +196,6 @@ figma.ui.onmessage = async (msg) => {
 };
 
 interface GridFrameParams {
-  breakpoint: string;
   columns: number;
   variables: Map<string, Variable> | null;
   width: number;
@@ -209,15 +205,7 @@ interface GridFrameParams {
 }
 
 async function createGridFrame(params: GridFrameParams) {
-  const {
-    breakpoint,
-    columns,
-    variables,
-    width,
-    margin,
-    gutter,
-    roundedColWidth,
-  } = params;
+  const { columns, variables, width, margin, gutter, roundedColWidth } = params;
 
   const frame = figma.createFrame();
   frame.name = `${width}`;

@@ -1,18 +1,19 @@
 {
   "name": "grid-variables",
   "version": "1.0.0",
-  "description": "A modern Figma plugin boilerplate built with Svelte and a UI3 Kit",
+  "description": "Figma plugin: generate layout grid variables and preview frames from grid parameters.",
   "type": "module",
   "author": "Marius Roosendaal",
   "license": "MIT",
   "keywords": [
     "figma",
     "figma-plugin",
+    "design-tokens",
+    "variables",
+    "layout-grid",
+    "responsive",
     "svelte",
-    "boilerplate",
-    "typescript",
-    "vite",
-    "ui3-kit"
+    "typescript"
   ],
   "engines": {
     "node": ">=18.0.0"
