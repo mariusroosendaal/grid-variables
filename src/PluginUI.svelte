@@ -13,7 +13,7 @@
     Footer,
     sendToPlugin,
     createMessageHandler,
-  } from "figma-plugin-utils";
+  } from "figma-plugin-utilities";
 
   // Inputs
   let maxWidth = "1440";
