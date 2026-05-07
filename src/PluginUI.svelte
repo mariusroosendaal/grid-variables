@@ -32,7 +32,9 @@
   let calculatedWidth = "--";
   let columnWidth = "--";
   let resultColor = "";
+  let gridIsValid = true;
 
+  $: hasCollections = collections.length > 0;
   $: collectionOptions = collections.map((c) => ({
     label: c.name,
     value: c.id,
@@ -41,10 +43,10 @@
   function calculateGrid() {
     sendToPlugin("calculate-grid", {
       data: {
-        maxWidth: parseInt(maxWidth) || 0,
-        columns: parseInt(columns) || 0,
-        gutter: parseInt(gutter) || 0,
-        margin: parseInt(margin) || 0,
+        maxWidth: parseInt(maxWidth, 10) || 0,
+        columns: parseInt(columns, 10) || 0,
+        gutter: parseInt(gutter, 10) || 0,
+        margin: parseInt(margin, 10) || 0,
       },
     });
   }
@@ -54,20 +56,31 @@
       data: {
         collectionId: selectedCollection?.value || "",
         breakpoint: breakpoint || "default",
-        viewport: parseInt(maxWidth) || 0,
-        columns: parseInt(columns) || 0,
-        margin: parseInt(margin) || 0,
-        gutter: parseInt(gutter) || 0,
+        viewport: parseInt(maxWidth, 10) || 0,
+        columns: parseInt(columns, 10) || 0,
+        margin: parseInt(margin, 10) || 0,
+        gutter: parseInt(gutter, 10) || 0,
         generateVariables,
         generateFrame,
       },
     });
   }
 
+  $: generateDisabled = (!generateVariables && !generateFrame) || !gridIsValid;
+  $: tooltipLabel = !gridIsValid
+    ? "Fix grid values before generating"
+    : "Select at least one output option to enable";
+
   window.onmessage = createMessageHandler({
     "grid-results": (msg) => {
-      calculatedWidth = `${msg.data.calculatedPageWidth}px`;
-      columnWidth = `${msg.data.columnWidth}px`;
+      gridIsValid = msg.data.isValid !== false;
+      if (gridIsValid) {
+        calculatedWidth = `${msg.data.calculatedPageWidth}px`;
+        columnWidth = `${msg.data.columnWidth}px`;
+      } else {
+        calculatedWidth = "--";
+        columnWidth = "--";
+      }
       resultColor = msg.data.color || "";
     },
     "load-collections": (msg) => {
@@ -151,13 +164,16 @@
             <Dropdown
               menuItems={collectionOptions}
               bind:value={selectedCollection}
-              placeholder="Select collection"
+              placeholder={hasCollections ? "Select collection" : "No collections in this file"}
+              disabled={!hasCollections}
               ariaLabel="Variable collection"
             />
           </FieldGroup>
-          <FieldGroup label="Group" size="small" labelFor="input-group">
-            <Input bind:value={breakpoint} placeholder="grid/xl" id="input-group" />
-          </FieldGroup>
+          {#if hasCollections}
+            <FieldGroup label="Group" size="small" labelFor="input-group">
+              <Input bind:value={breakpoint} placeholder="grid/xl" id="input-group" />
+            </FieldGroup>
+          {/if}
         </div>
       {/if}
 
@@ -167,15 +183,15 @@
 
   <Footer variant="full">
     <Tooltip
-      label="Select at least one output option to enable"
+      label={tooltipLabel}
       direction="Top"
-      disabled={generateVariables || generateFrame}
+      disabled={!generateDisabled}
     >
       <Button
         variant="primary"
         on:click={handleGenerate}
         fullWidth
-        disabled={!generateVariables && !generateFrame}
+        disabled={generateDisabled}
       >
         Generate
       </Button>

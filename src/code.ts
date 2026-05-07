@@ -1,12 +1,35 @@
-// This file holds the main logic for the plugin.
-// It creates variables and generates a Figma frame bound to those variables.
+interface GridMetrics {
+  roundedColWidth: number;
+  calculatedPageWidth: number;
+  isValid: boolean;
+}
+
+function computeGrid(maxWidth: number, columns: number, gutter: number, margin: number): GridMetrics {
+  if (columns <= 0 || maxWidth <= 0) {
+    return { roundedColWidth: 0, calculatedPageWidth: 0, isValid: false };
+  }
+  const totalGutterWidth = (columns - 1) * gutter;
+  const totalMarginWidth = 2 * margin;
+  const availableWidth = maxWidth - totalGutterWidth - totalMarginWidth;
+  const roundedColWidth = Math.round(availableWidth / columns);
+  if (roundedColWidth <= 0) {
+    return { roundedColWidth: 0, calculatedPageWidth: 0, isValid: false };
+  }
+  const calculatedPageWidth = roundedColWidth * columns + totalGutterWidth + totalMarginWidth;
+  return { roundedColWidth, calculatedPageWidth, isValid: true };
+}
+
+function getVar(variables: Map<string, Variable>, key: string): Variable {
+  const v = variables.get(key);
+  if (!v) throw new Error(`Missing variable: ${key}`);
+  return v;
+}
 
 async function initializePlugin() {
   figma.showUI(__html__, { themeColors: true, width: 240, height: 380 });
 
   try {
-    const collections =
-      await figma.variables.getLocalVariableCollectionsAsync();
+    const collections = await figma.variables.getLocalVariableCollectionsAsync();
     const collectionData = collections.map((collection) => ({
       id: collection.id,
       name: collection.name,
@@ -20,49 +43,31 @@ async function initializePlugin() {
 initializePlugin();
 
 figma.ui.onmessage = async (msg) => {
-  // --- Window Resize ---
   if (msg.type === "resize-window") {
-    figma.ui.resize(240, msg.data.height);
+    const height = Math.max(100, Math.min(2000, Number(msg.data.height) || 380));
+    figma.ui.resize(240, height);
     return;
   }
 
-  // --- Grid Calculation (Unchanged) ---
   if (msg.type === "calculate-grid") {
     const { maxWidth, columns, gutter, margin } = msg.data;
-    if (columns <= 0) {
+    const grid = computeGrid(maxWidth, columns, gutter, margin);
+    if (!grid.isValid) {
       figma.ui.postMessage({
         type: "grid-results",
-        data: {
-          calculatedPageWidth: 0,
-          columnWidth: 0,
-          color: "var(--figma-color-text-danger)",
-        },
+        data: { calculatedPageWidth: 0, columnWidth: 0, color: "var(--figma-color-text-danger)", isValid: false },
       });
       return;
     }
-    const totalGutterWidth = (columns - 1) * gutter;
-    const totalMarginWidth = 2 * margin;
-    const availableWidthForColumns =
-      maxWidth - totalGutterWidth - totalMarginWidth;
-    const rawColumnWidth = availableWidthForColumns / columns;
-    const roundedColumnWidth = Math.round(rawColumnWidth);
-    const calculatedPageWidth =
-      roundedColumnWidth * columns + totalGutterWidth + totalMarginWidth;
-    const resultColor =
-      calculatedPageWidth === maxWidth
-        ? "var(--figma-color-text-success)"
-        : "var(--figma-color-text-danger)";
+    const resultColor = grid.calculatedPageWidth === maxWidth
+      ? "var(--figma-color-text-success)"
+      : "var(--figma-color-text-danger)";
     figma.ui.postMessage({
       type: "grid-results",
-      data: {
-        calculatedPageWidth,
-        columnWidth: roundedColumnWidth,
-        color: resultColor,
-      },
+      data: { calculatedPageWidth: grid.calculatedPageWidth, columnWidth: grid.roundedColWidth, color: resultColor, isValid: true },
     });
   }
 
-  // --- Variable & Frame Generation ---
   if (msg.type === "generate-actions") {
     const {
       collectionId,
@@ -75,71 +80,56 @@ figma.ui.onmessage = async (msg) => {
       generateFrame,
     } = msg.data;
 
+    const grid = computeGrid(targetMaxWidth, columns, gutter, margin);
+    if (!grid.isValid) {
+      figma.notify("Invalid grid — check your values.", { error: true });
+      return;
+    }
+
+    const sanitizedBreakpoint = String(breakpoint || "").trim().slice(0, 64) || "default";
+
     let createdOrUpdatedVariables: Map<string, Variable> | null = null;
-    let notificationMessage = "";
 
     try {
-      // --- ACTION 1: Generate or Update Variables (Conditional) ---
       if (generateVariables) {
         if (!collectionId) {
-          figma.notify("Please select a variable collection to proceed.", {
-            error: true,
-          });
+          figma.notify("Please select a variable collection to proceed.", { error: true });
           return;
         }
-        const collection =
-          await figma.variables.getVariableCollectionByIdAsync(collectionId);
+        const collection = await figma.variables.getVariableCollectionByIdAsync(collectionId);
         if (!collection) {
           throw new Error("Collection not found.");
         }
 
-        const groupPrefix = `${breakpoint}/`;
+        const groupPrefix = `${sanitizedBreakpoint}/`;
         const allVariables = await figma.variables.getLocalVariablesAsync();
         const existingVariablesInGroup = allVariables.filter(
-          (v) =>
-            v.variableCollectionId === collection.id &&
-            v.name.startsWith(groupPrefix),
+          (v) => v.variableCollectionId === collection.id && v.name.startsWith(groupPrefix),
         );
 
         createdOrUpdatedVariables = new Map<string, Variable>();
 
-        const totalGutterW = (columns - 1) * gutter;
-        const totalMarginW = 2 * margin;
-        const availableWForCols = targetMaxWidth - totalGutterW - totalMarginW;
-        const roundedColWidth = Math.round(availableWForCols / columns);
-        const finalCalculatedWidth =
-          roundedColWidth * columns + totalGutterW + totalMarginW;
-        //
-        // Map of all variables we expect to exist after this operation
         const desiredVariables = new Map<string, number>();
-        desiredVariables.set("viewport", finalCalculatedWidth);
+        desiredVariables.set("viewport", grid.calculatedPageWidth);
         desiredVariables.set("columns", columns);
         desiredVariables.set("margin", margin);
         desiredVariables.set("gutter", gutter);
         for (let i = 1; i <= columns; i++) {
-          const spanWidth = i * roundedColWidth + (i - 1) * gutter;
-          desiredVariables.set(`col-${i}`, spanWidth);
+          desiredVariables.set(`col-${i}`, i * grid.roundedColWidth + (i - 1) * gutter);
         }
 
         const existingVarMap = new Map(
-          existingVariablesInGroup.map((v) => [
-            v.name.replace(groupPrefix, ""),
-            v,
-          ]),
+          existingVariablesInGroup.map((v) => [v.name.replace(groupPrefix, ""), v]),
         );
 
-        // --- Sync: Update existing, create new ---
         for (const [name, value] of desiredVariables.entries()) {
           const existingVar = existingVarMap.get(name);
           if (existingVar) {
-            // UPDATE: Variable already exists, just update its value. This preserves the ID.
             existingVar.setValueForMode(collection.defaultModeId, value);
             createdOrUpdatedVariables.set(name, existingVar);
           } else {
-            // CREATE: Variable doesn't exist, so create it.
-            const variableName = `${breakpoint}/${name}`;
             const newVar = figma.variables.createVariable(
-              variableName,
+              `${sanitizedBreakpoint}/${name}`,
               collection,
               "FLOAT",
             );
@@ -148,49 +138,29 @@ figma.ui.onmessage = async (msg) => {
           }
         }
 
-        // --- Sync: Delete obsolete variables ---
-        // (e.g., if user changes from 12 columns to 8, delete col-9 through col-12)
         for (const [name, variable] of existingVarMap.entries()) {
           if (!desiredVariables.has(name)) {
             variable.remove();
           }
         }
 
-        notificationMessage =
-          existingVariablesInGroup.length > 0
-            ? "Variables synced!"
-            : "Variables created!";
-        figma.notify(notificationMessage);
-
-        //
+        figma.notify(existingVariablesInGroup.length > 0 ? "Variables synced!" : "Variables created!");
       }
+
       if (generateFrame) {
-        const totalGutterW = (columns - 1) * gutter;
-        const totalMarginW = 2 * margin;
-        const availableWForCols = targetMaxWidth - totalGutterW - totalMarginW;
-        const roundedColWidth = Math.round(availableWForCols / columns);
-        const finalCalculatedWidth =
-          roundedColWidth * columns + totalGutterW + totalMarginW;
         await createGridFrame({
           columns,
           variables: createdOrUpdatedVariables,
-          width: finalCalculatedWidth,
+          width: grid.calculatedPageWidth,
           margin,
           gutter,
-          roundedColWidth,
+          roundedColWidth: grid.roundedColWidth,
         });
-
         figma.notify("Frame generated!");
-      }
-
-      if (generateVariables || generateFrame) {
-        // figma.closePlugin(); // Uncomment this to close the plugin after generation
       }
     } catch (error) {
       console.error("Error during generation:", error);
-      figma.notify("An error occurred. See console for details.", {
-        error: true,
-      });
+      figma.notify("An error occurred. See console for details.", { error: true });
     }
   }
 };
@@ -213,23 +183,17 @@ async function createGridFrame(params: GridFrameParams) {
   frame.primaryAxisSizingMode = "AUTO";
 
   const gridColor = { r: 0, g: 106 / 255, b: 255 / 255 };
-  const fillPaint: SolidPaint = {
-    type: "SOLID",
-    color: gridColor,
-    opacity: 0.08,
-  };
+  const fillPaint: SolidPaint = { type: "SOLID", color: gridColor, opacity: 0.08 };
 
   if (variables) {
-    // BOUND MODE: Use setBoundVariable
     frame.counterAxisSizingMode = "FIXED";
-    frame.setBoundVariable("width", variables.get("viewport")!);
-    frame.setBoundVariable("paddingLeft", variables.get("margin")!);
-    frame.setBoundVariable("paddingRight", variables.get("margin")!);
-    frame.setBoundVariable("paddingTop", variables.get("margin")!);
-    frame.setBoundVariable("paddingBottom", variables.get("margin")!);
-    frame.setBoundVariable("itemSpacing", variables.get("gutter")!);
+    frame.setBoundVariable("width", getVar(variables, "viewport"));
+    frame.setBoundVariable("paddingLeft", getVar(variables, "margin"));
+    frame.setBoundVariable("paddingRight", getVar(variables, "margin"));
+    frame.setBoundVariable("paddingTop", getVar(variables, "margin"));
+    frame.setBoundVariable("paddingBottom", getVar(variables, "margin"));
+    frame.setBoundVariable("itemSpacing", getVar(variables, "gutter"));
   } else {
-    // STATIC MODE: Use raw number values
     frame.resize(width, frame.height);
     frame.paddingLeft = margin;
     frame.paddingRight = margin;
@@ -240,26 +204,20 @@ async function createGridFrame(params: GridFrameParams) {
 
   let layoutGrid: RowsColsLayoutGrid;
   if (variables) {
-    // BOUND MODE
     layoutGrid = {
       pattern: "COLUMNS",
       alignment: "STRETCH",
       count: columns,
       color: { ...gridColor, a: 0.08 },
-      gutterSize: variables.get("gutter")!.resolveForConsumer(frame)
-        .value as number,
-      offset: variables.get("margin")!.resolveForConsumer(frame)
-        .value as number,
+      gutterSize: getVar(variables, "gutter").resolveForConsumer(frame).value as number,
+      offset: getVar(variables, "margin").resolveForConsumer(frame).value as number,
       boundVariables: {
-        gutterSize: figma.variables.createVariableAlias(
-          variables.get("gutter")!,
-        ),
-        offset: figma.variables.createVariableAlias(variables.get("margin")!),
-        count: figma.variables.createVariableAlias(variables.get("columns")!),
+        gutterSize: figma.variables.createVariableAlias(getVar(variables, "gutter")),
+        offset: figma.variables.createVariableAlias(getVar(variables, "margin")),
+        count: figma.variables.createVariableAlias(getVar(variables, "columns")),
       },
     };
   } else {
-    // STATIC MODE
     layoutGrid = {
       pattern: "COLUMNS",
       alignment: "STRETCH",
@@ -282,11 +240,11 @@ async function createGridFrame(params: GridFrameParams) {
     bar.resize(0, 64);
 
     if (variables) {
-      bar.setBoundVariable("width", variables.get(`col-${i}`)!);
+      bar.setBoundVariable("width", getVar(variables, `col-${i}`));
     } else {
-      const spanWidth = i * roundedColWidth + (i - 1) * gutter;
-      bar.resize(spanWidth, 64);
+      bar.resize(i * roundedColWidth + (i - 1) * gutter, 64);
     }
+
     const text = figma.createText();
     text.characters = String(i);
     text.fontSize = 14;
