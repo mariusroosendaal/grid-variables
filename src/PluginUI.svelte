@@ -4,8 +4,8 @@
     Checkbox,
     Dropdown,
     Input,
-    Label,
     Text,
+    Tooltip,
   } from "figma-ui3-kit-svelte";
   import {
     PluginLayout,
@@ -98,76 +98,88 @@
 
 <div class="plugin-container">
   <PluginLayout>
-    <section class="section">
-      <Label>Grid</Label>
+    <fieldset class="section">
+      <Text as="legend" variant="body-medium">Grid</Text>
       <div class="grid-inputs">
-        <FieldGroup label="Max width" size="small">
-          <Input type="number" bind:value={maxWidth} />
+        <FieldGroup label="Max width" size="small" labelFor="input-max-width">
+          <Input type="number" bind:value={maxWidth} id="input-max-width" />
         </FieldGroup>
-        <FieldGroup label="Columns" size="small">
-          <Input type="number" bind:value={columns} />
+        <FieldGroup label="Columns" size="small" labelFor="input-columns">
+          <Input type="number" bind:value={columns} id="input-columns" />
         </FieldGroup>
-        <FieldGroup label="Margin" size="small">
-          <Input type="number" bind:value={margin} />
+        <FieldGroup label="Margin" size="small" labelFor="input-margin">
+          <Input type="number" bind:value={margin} id="input-margin" />
         </FieldGroup>
-        <FieldGroup label="Gutter" size="small">
-          <Input type="number" bind:value={gutter} />
+        <FieldGroup label="Gutter" size="small" labelFor="input-gutter">
+          <Input type="number" bind:value={gutter} id="input-gutter" />
         </FieldGroup>
       </div>
+    </fieldset>
+
+    <hr aria-hidden="true" />
+
+    <section
+      class="section results"
+      aria-live="polite"
+      aria-atomic="true"
+      aria-label="Grid calculation results"
+    >
+      <dl class="results-list">
+        <div class="result">
+          <dt><Text variant="body-medium">Calculated width</Text></dt>
+          <dd><Text variant="body-medium" color={resultColor || '--figma-color-text'}>{calculatedWidth}</Text></dd>
+        </div>
+        <div class="result">
+          <dt><Text variant="body-medium">Column width</Text></dt>
+          <dd><Text variant="body-medium">{columnWidth}</Text></dd>
+        </div>
+      </dl>
     </section>
 
-    <hr />
+    <hr aria-hidden="true" />
 
-    <section class="section results">
-      <div class="result">
-        <Label>Calculated width</Label>
-        <Text variant="body-medium" color={resultColor}>
-          {calculatedWidth}
-        </Text>
-      </div>
-      <div class="result">
-        <Label>Column width</Label>
-        <Text variant="body-medium">{columnWidth}</Text>
-      </div>
-    </section>
-
-    <hr />
-
-    <section class="section">
-      <Label>Output</Label>
+    <fieldset class="section">
+      <Text as="legend" variant="body-medium">Output</Text>
 
       <Checkbox bind:checked={generateVariables}>
         Save to variable collection
       </Checkbox>
 
       {#if generateVariables}
-        <section class="section variables-section">
-          <FieldGroup label="Collection" size="small">
+        <div class="section variables-section">
+          <FieldGroup label="Collection" size="small" labelFor="input-collection">
             <Dropdown
               menuItems={collectionOptions}
               bind:value={selectedCollection}
               placeholder="Select collection"
+              ariaLabel="Variable collection"
             />
           </FieldGroup>
-          <FieldGroup label="Group" size="small">
-            <Input bind:value={breakpoint} placeholder="grid/xl" />
+          <FieldGroup label="Group" size="small" labelFor="input-group">
+            <Input bind:value={breakpoint} placeholder="grid/xl" id="input-group" />
           </FieldGroup>
-        </section>
+        </div>
       {/if}
 
       <Checkbox bind:checked={generateFrame}>Generate preview frame</Checkbox>
-    </section>
+    </fieldset>
   </PluginLayout>
 
   <Footer variant="full">
-    <Button
-      variant="primary"
-      on:click={handleGenerate}
-      fullWidth
-      disabled={!generateVariables && !generateFrame}
+    <Tooltip
+      label="Select at least one output option to enable"
+      direction="Top"
+      disabled={generateVariables || generateFrame}
     >
-      Generate
-    </Button>
+      <Button
+        variant="primary"
+        on:click={handleGenerate}
+        fullWidth
+        disabled={!generateVariables && !generateFrame}
+      >
+        Generate
+      </Button>
+    </Tooltip>
   </Footer>
 </div>
 
@@ -183,6 +195,18 @@
     flex-direction: column;
     gap: var(--size-xxsmall);
   }
+
+  fieldset.section {
+    border: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  fieldset.section :global(legend) {
+    padding: 0;
+    margin-bottom: var(--size-xxsmall);
+  }
+
   .variables-section {
     margin-bottom: var(--size-xxxsmall);
   }
@@ -198,11 +222,23 @@
     gap: var(--size-xxsmall);
   }
 
+  .results-list {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--size-xxsmall);
+  }
+
   .result {
     flex: 1;
     display: flex;
     flex-direction: row;
     gap: var(--size-xxxsmall);
+  }
+
+  .result dd {
+    margin: 0 0 0 auto;
   }
 
   hr {
