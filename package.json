@@ -1,7 +1,7 @@
 {
   "name": "grid-variables",
   "version": "1.0.0",
-  "description": "Figma plugin: generate layout grid variables and preview frames from grid parameters.",
+  "description": "Generate layout grid variables and preview frames from grid parameters.",
   "type": "module",
   "author": "Marius Roosendaal",
   "license": "MIT",
