@@ -4,7 +4,12 @@ interface GridMetrics {
   isValid: boolean;
 }
 
-function computeGrid(maxWidth: number, columns: number, gutter: number, margin: number): GridMetrics {
+function computeGrid(
+  maxWidth: number,
+  columns: number,
+  gutter: number,
+  margin: number,
+): GridMetrics {
   if (columns <= 0 || maxWidth <= 0) {
     return { roundedColWidth: 0, calculatedPageWidth: 0, isValid: false };
   }
@@ -15,7 +20,8 @@ function computeGrid(maxWidth: number, columns: number, gutter: number, margin: 
   if (roundedColWidth <= 0) {
     return { roundedColWidth: 0, calculatedPageWidth: 0, isValid: false };
   }
-  const calculatedPageWidth = roundedColWidth * columns + totalGutterWidth + totalMarginWidth;
+  const calculatedPageWidth =
+    roundedColWidth * columns + totalGutterWidth + totalMarginWidth;
   return { roundedColWidth, calculatedPageWidth, isValid: true };
 }
 
@@ -29,7 +35,8 @@ async function initializePlugin() {
   figma.showUI(__html__, { themeColors: true, width: 240, height: 380 });
 
   try {
-    const collections = await figma.variables.getLocalVariableCollectionsAsync();
+    const collections =
+      await figma.variables.getLocalVariableCollectionsAsync();
     const collectionData = collections.map((collection) => ({
       id: collection.id,
       name: collection.name,
@@ -44,7 +51,10 @@ initializePlugin();
 
 figma.ui.onmessage = async (msg) => {
   if (msg.type === "resize-window") {
-    const height = Math.max(100, Math.min(2000, Number(msg.data.height) || 380));
+    const height = Math.max(
+      100,
+      Math.min(2000, Number(msg.data.height) || 380),
+    );
     figma.ui.resize(240, height);
     return;
   }
@@ -55,16 +65,27 @@ figma.ui.onmessage = async (msg) => {
     if (!grid.isValid) {
       figma.ui.postMessage({
         type: "grid-results",
-        data: { calculatedPageWidth: 0, columnWidth: 0, color: "var(--figma-color-text-danger)", isValid: false },
+        data: {
+          calculatedPageWidth: 0,
+          columnWidth: 0,
+          color: "var(--figma-color-text-danger)",
+          isValid: false,
+        },
       });
       return;
     }
-    const resultColor = grid.calculatedPageWidth === maxWidth
-      ? "var(--figma-color-text-success)"
-      : "var(--figma-color-text-danger)";
+    const resultColor =
+      grid.calculatedPageWidth === maxWidth
+        ? "var(--figma-color-text-success)"
+        : "var(--figma-color-text-danger)";
     figma.ui.postMessage({
       type: "grid-results",
-      data: { calculatedPageWidth: grid.calculatedPageWidth, columnWidth: grid.roundedColWidth, color: resultColor, isValid: true },
+      data: {
+        calculatedPageWidth: grid.calculatedPageWidth,
+        columnWidth: grid.roundedColWidth,
+        color: resultColor,
+        isValid: true,
+      },
     });
   }
 
@@ -86,17 +107,23 @@ figma.ui.onmessage = async (msg) => {
       return;
     }
 
-    const sanitizedBreakpoint = String(breakpoint || "").trim().slice(0, 64) || "default";
+    const sanitizedBreakpoint =
+      String(breakpoint || "")
+        .trim()
+        .slice(0, 64) || "default";
 
     let createdOrUpdatedVariables: Map<string, Variable> | null = null;
 
     try {
       if (generateVariables) {
         if (!collectionId) {
-          figma.notify("Please select a variable collection to proceed.", { error: true });
+          figma.notify("Please select a variable collection to proceed.", {
+            error: true,
+          });
           return;
         }
-        const collection = await figma.variables.getVariableCollectionByIdAsync(collectionId);
+        const collection =
+          await figma.variables.getVariableCollectionByIdAsync(collectionId);
         if (!collection) {
           throw new Error("Collection not found.");
         }
@@ -104,7 +131,9 @@ figma.ui.onmessage = async (msg) => {
         const groupPrefix = `${sanitizedBreakpoint}/`;
         const allVariables = await figma.variables.getLocalVariablesAsync();
         const existingVariablesInGroup = allVariables.filter(
-          (v) => v.variableCollectionId === collection.id && v.name.startsWith(groupPrefix),
+          (v) =>
+            v.variableCollectionId === collection.id &&
+            v.name.startsWith(groupPrefix),
         );
 
         createdOrUpdatedVariables = new Map<string, Variable>();
@@ -115,11 +144,17 @@ figma.ui.onmessage = async (msg) => {
         desiredVariables.set("margin", margin);
         desiredVariables.set("gutter", gutter);
         for (let i = 1; i <= columns; i++) {
-          desiredVariables.set(`col-${i}`, i * grid.roundedColWidth + (i - 1) * gutter);
+          desiredVariables.set(
+            `col-${i}`,
+            i * grid.roundedColWidth + (i - 1) * gutter,
+          );
         }
 
         const existingVarMap = new Map(
-          existingVariablesInGroup.map((v) => [v.name.replace(groupPrefix, ""), v]),
+          existingVariablesInGroup.map((v) => [
+            v.name.replace(groupPrefix, ""),
+            v,
+          ]),
         );
 
         for (const [name, value] of desiredVariables.entries()) {
@@ -144,7 +179,11 @@ figma.ui.onmessage = async (msg) => {
           }
         }
 
-        figma.notify(existingVariablesInGroup.length > 0 ? "Variables synced!" : "Variables created!");
+        figma.notify(
+          existingVariablesInGroup.length > 0
+            ? "Variables synced!"
+            : "Variables created!",
+        );
       }
 
       if (generateFrame) {
@@ -160,7 +199,9 @@ figma.ui.onmessage = async (msg) => {
       }
     } catch (error) {
       console.error("Error during generation:", error);
-      figma.notify("An error occurred. See console for details.", { error: true });
+      figma.notify("An error occurred. See console for details.", {
+        error: true,
+      });
     }
   }
 };
@@ -183,7 +224,11 @@ async function createGridFrame(params: GridFrameParams) {
   frame.primaryAxisSizingMode = "AUTO";
 
   const gridColor = { r: 0, g: 106 / 255, b: 255 / 255 };
-  const fillPaint: SolidPaint = { type: "SOLID", color: gridColor, opacity: 0.08 };
+  const fillPaint: SolidPaint = {
+    type: "SOLID",
+    color: gridColor,
+    opacity: 0.08,
+  };
 
   if (variables) {
     frame.counterAxisSizingMode = "FIXED";
@@ -209,12 +254,20 @@ async function createGridFrame(params: GridFrameParams) {
       alignment: "STRETCH",
       count: columns,
       color: { ...gridColor, a: 0.08 },
-      gutterSize: getVar(variables, "gutter").resolveForConsumer(frame).value as number,
-      offset: getVar(variables, "margin").resolveForConsumer(frame).value as number,
+      gutterSize: getVar(variables, "gutter").resolveForConsumer(frame)
+        .value as number,
+      offset: getVar(variables, "margin").resolveForConsumer(frame)
+        .value as number,
       boundVariables: {
-        gutterSize: figma.variables.createVariableAlias(getVar(variables, "gutter")),
-        offset: figma.variables.createVariableAlias(getVar(variables, "margin")),
-        count: figma.variables.createVariableAlias(getVar(variables, "columns")),
+        gutterSize: figma.variables.createVariableAlias(
+          getVar(variables, "gutter"),
+        ),
+        offset: figma.variables.createVariableAlias(
+          getVar(variables, "margin"),
+        ),
+        count: figma.variables.createVariableAlias(
+          getVar(variables, "columns"),
+        ),
       },
     };
   } else {

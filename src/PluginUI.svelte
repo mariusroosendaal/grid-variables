@@ -140,7 +140,13 @@
       <dl class="results-list">
         <div class="result">
           <dt><Text variant="body-medium">Calculated width</Text></dt>
-          <dd><Text variant="body-medium" color={resultColor || '--figma-color-text'}>{calculatedWidth}</Text></dd>
+          <dd>
+            <Text
+              variant="body-medium"
+              color={resultColor || "--figma-color-text"}
+              >{calculatedWidth}</Text
+            >
+          </dd>
         </div>
         <div class="result">
           <dt><Text variant="body-medium">Column width</Text></dt>
@@ -160,18 +166,28 @@
 
       {#if generateVariables}
         <div class="section variables-section">
-          <FieldGroup label="Collection" size="small" labelFor="input-collection">
+          <FieldGroup
+            label="Collection"
+            size="small"
+            labelFor="input-collection"
+          >
             <Dropdown
               menuItems={collectionOptions}
               bind:value={selectedCollection}
-              placeholder={hasCollections ? "Select collection" : "No collections in this file"}
+              placeholder={hasCollections
+                ? "Select collection"
+                : "No collections in this file"}
               disabled={!hasCollections}
               ariaLabel="Variable collection"
             />
           </FieldGroup>
           {#if hasCollections}
             <FieldGroup label="Group" size="small" labelFor="input-group">
-              <Input bind:value={breakpoint} placeholder="grid/xl" id="input-group" />
+              <Input
+                bind:value={breakpoint}
+                placeholder="grid/xl"
+                id="input-group"
+              />
             </FieldGroup>
           {/if}
         </div>
@@ -182,11 +198,7 @@
   </PluginLayout>
 
   <Footer variant="full">
-    <Tooltip
-      label={tooltipLabel}
-      direction="Top"
-      disabled={!generateDisabled}
-    >
+    <Tooltip label={tooltipLabel} direction="Top" disabled={!generateDisabled}>
       <Button
         variant="primary"
         on:click={handleGenerate}
