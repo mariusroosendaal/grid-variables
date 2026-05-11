@@ -203,7 +203,7 @@
         variant="primary"
         on:click={handleGenerate}
         fullWidth
-        disabled={generateDisabled}
+        ariaDisabled={generateDisabled}
       >
         Generate
       </Button>
