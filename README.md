@@ -1,3 +1,5 @@
+![Grid Variables Cover](assets/thumbnail.png)
+
 # Grid Variables
 
 Generate layout grid variables and preview frames for responsive design systems.
