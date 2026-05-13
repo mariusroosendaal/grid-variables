@@ -2,7 +2,7 @@
 
 # Grid Variables
 
-Generate layout grid variables and preview frames for responsive design systems.
+A Figma plugin for generating layout grid variables and preview frames for responsive design systems.
 
 ## What it does
 
