@@ -4,6 +4,10 @@
 
 A Figma plugin for generating layout grid variables and preview frames for responsive design systems.
 
+## Install
+
+Get it from the [Figma Community](https://www.figma.com/community/plugin/1547186853289230831/grid-variables)
+
 ## What it does
 
 Calculates column widths from your grid parameters and creates Figma variables for viewport, columns, margins, gutters, and column spans. Optionally generates a preview frame with the grid bound to those variables.
