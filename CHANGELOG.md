@@ -12,6 +12,7 @@
 
 - Grid and Output sections now use `<fieldset>`/`<legend>` for proper semantic grouping
 - Results section uses `<dl>`/`<dt>`/`<dd>` for semantic term–value pairing, with `aria-live="polite"` so recalculated values are announced to screen readers
+- Updated icon imports to use `figma-ui3-kit-svelte/icons` following the UI kit icon export restructure.
 - All form inputs have programmatically associated labels (`id`/`for` pairs)
 - Collection Dropdown has an accessible label independent of its selected value
 - Decorative `<hr>` separators hidden from assistive technology
