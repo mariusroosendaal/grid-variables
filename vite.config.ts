@@ -5,7 +5,9 @@ import { defineConfig } from "vite";
 import type { Plugin } from "vite";
 import type { OutputBundle, OutputOptions, OutputAsset } from "rollup";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import { visualizer } from "rollup-plugin-visualizer";
+
+// Uncomment to enable bundle visualizer
+// import { visualizer } from "rollup-plugin-visualizer";
 
 // ES module compatibility for __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -147,7 +149,7 @@ export default defineConfig({
     ui3InlineSvg(), // Handle SVG imports from UI3 Kit
     svelte(), // Compile Svelte components
     inlineFigmaHtml(), // Inline everything into single HTML file
-    visualizer({ open: true, gzipSize: true, filename: "dist/bundle-stats.html" }) as any,
+    // visualizer({ open: true, gzipSize: true, filename: "dist/bundle-stats.html" }) as any,
   ],
   build: {
     outDir: "dist",
