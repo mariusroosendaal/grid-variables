@@ -20,7 +20,7 @@
   let columns = "12";
   let margin = "24";
   let gutter = "24";
-  let breakpoint = "grid/xl";
+  let breakpoint = "xl";
 
   // Options
   let generateVariables = false;
@@ -185,7 +185,7 @@
             <FieldGroup label="Group" size="small" labelFor="input-group">
               <Input
                 bind:value={breakpoint}
-                placeholder="grid/xl"
+                placeholder="xl"
                 id="input-group"
               />
             </FieldGroup>

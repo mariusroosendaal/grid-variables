@@ -25,6 +25,12 @@ function computeGrid(
   return { roundedColWidth, calculatedPageWidth, isValid: true };
 }
 
+// Aliases only (margin, gutter, viewport, columns) get no scopes so they stay
+// out of the variable picker; col-* sizes are only ever used for width/height.
+function scopesFor(name: string): VariableScope[] {
+  return name.startsWith("col-") ? ["WIDTH_HEIGHT"] : [];
+}
+
 function getVar(variables: Map<string, Variable>, key: string): Variable {
   const v = variables.get(key);
   if (!v) throw new Error(`Missing variable: ${key}`);
@@ -161,6 +167,7 @@ figma.ui.onmessage = async (msg) => {
           const existingVar = existingVarMap.get(name);
           if (existingVar) {
             existingVar.setValueForMode(collection.defaultModeId, value);
+            existingVar.scopes = scopesFor(name);
             createdOrUpdatedVariables.set(name, existingVar);
           } else {
             const newVar = figma.variables.createVariable(
@@ -169,6 +176,7 @@ figma.ui.onmessage = async (msg) => {
               "FLOAT",
             );
             newVar.setValueForMode(collection.defaultModeId, value);
+            newVar.scopes = scopesFor(name);
             createdOrUpdatedVariables.set(name, newVar);
           }
         }
