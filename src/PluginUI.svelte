@@ -261,7 +261,9 @@
 
   .grid-inputs {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    /* minmax(0, 1fr), not 1fr: a bare 1fr track will not shrink below its
+       content, and a field is wider than this panel. */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: var(--size-xxsmall);
   }
 
