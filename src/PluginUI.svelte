@@ -4,6 +4,7 @@
     Checkbox,
     Dropdown,
     Input,
+    NumericInput,
     Text,
     Tooltip,
   } from "figma-ui3-kit-svelte";
@@ -16,10 +17,10 @@
   } from "figma-plugin-utilities";
 
   // Inputs
-  let maxWidth = "1440";
-  let columns = "12";
-  let margin = "24";
-  let gutter = "24";
+  let maxWidth = 1440;
+  let columns = 12;
+  let margin = 24;
+  let gutter = 24;
   let breakpoint = "xl";
 
   // Options
@@ -95,9 +96,8 @@
   });
 
   // Calculate on mount and when inputs change
-  $: if (maxWidth || columns || gutter || margin) {
-    calculateGrid();
-  }
+  // Passed as arguments so the statement re-runs on any of them, including 0
+  $: calculateGrid(maxWidth, columns, gutter, margin);
 
   // Resize plugin window when variables section expands/collapses
   $: {
@@ -115,16 +115,36 @@
       <Text as="legend" variant="body-medium">Grid</Text>
       <div class="grid-inputs">
         <FieldGroup label="Max width" size="small" labelFor="input-max-width">
-          <Input type="number" bind:value={maxWidth} id="input-max-width" />
+          <NumericInput
+            bind:value={maxWidth}
+            id="input-max-width"
+            min={0}
+            precision={0}
+          />
         </FieldGroup>
         <FieldGroup label="Columns" size="small" labelFor="input-columns">
-          <Input type="number" bind:value={columns} id="input-columns" />
+          <NumericInput
+            bind:value={columns}
+            id="input-columns"
+            min={1}
+            precision={0}
+          />
         </FieldGroup>
         <FieldGroup label="Margin" size="small" labelFor="input-margin">
-          <Input type="number" bind:value={margin} id="input-margin" />
+          <NumericInput
+            bind:value={margin}
+            id="input-margin"
+            min={0}
+            precision={0}
+          />
         </FieldGroup>
         <FieldGroup label="Gutter" size="small" labelFor="input-gutter">
-          <Input type="number" bind:value={gutter} id="input-gutter" />
+          <NumericInput
+            bind:value={gutter}
+            id="input-gutter"
+            min={0}
+            precision={0}
+          />
         </FieldGroup>
       </div>
     </fieldset>
