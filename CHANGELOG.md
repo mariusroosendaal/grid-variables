@@ -7,11 +7,11 @@
 - Number fields are UI3 numeric inputs: drag the label to scrub, arrow keys step, and they accept arithmetic
 - Column sizes (`col-*`) are scoped to width and height; the aliases (margin, gutter, viewport, columns) get no scopes, so they stay out of the variable picker
 - The breakpoint name defaults to `xl`
+- Built on figma-ui3-kit-svelte 0.6.0, so its controls pick up that release's UI3 fixes
 
 ### Fixed
 
 - The two-column fields no longer overflow a narrow plugin window
-- Status messages are readable in the dark theme — the default status text had no color of its own and fell back to black
 
 ## [1.0.0] - 2026-05-07
 
