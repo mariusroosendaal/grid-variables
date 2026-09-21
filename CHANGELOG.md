@@ -11,7 +11,7 @@
 ### Fixed
 
 - The two-column fields no longer overflow a narrow plugin window
-- Status messages are readable in the dark theme — the default status text had no colour of its own and fell back to black
+- Status messages are readable in the dark theme — the default status text had no color of its own and fell back to black
 
 ## [1.0.0] - 2026-05-07
 
