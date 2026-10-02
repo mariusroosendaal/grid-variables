@@ -2,7 +2,7 @@
 
 # Grid Variables
 
-A Figma plugin for generating layout grid variables and preview frames for responsive design systems.
+Generate layout grid variables and a preview frame from your grid settings.
 
 ## Install
 
@@ -17,15 +17,11 @@ The plugin automatically rounds column widths to whole pixels and shows whether 
 ## Usage
 
 1. Run the plugin
-2. Configure grid parameters:
-   - Max width / viewport
-   - Number of columns
-   - Margin and gutter values
-3. Choose output options:
-   - **Save to variable collection** - Creates/updates variables in a selected collection with a group prefix (e.g., `grid/xl`)
-   - **Generate preview frame** - Creates a frame showing the grid layout
-4. If saving variables, select a collection and enter a group name
-5. Click Generate
+2. Enter the max width, the number of columns, and the margin and gutter
+3. Choose **Save to variable collection**, **Generate preview frame** or both. To save variables, pick a collection and enter a group name, such as `grid/xl`
+4. Click **Generate**
+
+For each screen and what its controls do, see the [user guide](https://figma-plugins.notion.site/Grid-Variables-3ecf29c09c9d81cab7d7d2997fe5a8fe).
 
 ## Output
 
