@@ -6,10 +6,10 @@ Grid Variables turns a column grid into number variables and a preview frame, fo
 
 ![](grid-variables-form.svg)
 
-1. **Grid**—the grid in pixels: **Max width**, the number of **Columns**, the **Margin** on each side and the **Gutter** between columns.
-2. **Calculated width**—the width of the grid after the plugin rounds the **Column width** to whole pixels. It's green when it equals **Max width**, and red when the rounding changes the width. If it's red, change a value until it's green.
-3. **Save to variable collection**—saves the grid in **Collection**, in a group named by **Group**: `xl/viewport` (the calculated width), `xl/columns`, `xl/margin`, `xl/gutter`, and `xl/col-1` to `xl/col-12` for the width of 1 to 12 columns.
-4. **Generate preview frame**—draws a frame named after the calculated width, `1440`, with a column layout grid and one bar for each span, from 1 column to 12.
+1. **Grid**: the **Max width**, the number of **Columns**, the **Margin** on each side and the **Gutter** between columns, in pixels.
+2. **Calculated width**: the width of the grid after the plugin rounds the **Column width** to whole pixels. It's green when it equals **Max width**, and red when the rounding changes the width. If it's red, change a value until it's green.
+3. **Save to variable collection**: saves the grid in **Collection**, in a group named by **Group**. For `xl`, it writes `xl/viewport` (the calculated width), `xl/columns`, `xl/margin`, `xl/gutter`, and `xl/col-1` to `xl/col-12` for the width of 1 to 12 columns.
+4. **Generate preview frame**: draws a frame named after the calculated width, `1440`, with a column layout grid and one bar for each span, from 1 column to 12.
 
 Click **Generate** to create the variables, the frame or both. Press Ctrl/Cmd+Z to undo.
 
