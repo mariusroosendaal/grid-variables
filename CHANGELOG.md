@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- **Generate** ends with one notification that counts the variables created, updated and removed in the group, and the frame, with the undo shortcut, in place of "Variables created!" and "Frame generated!"
+- Generating without a collection shows a regular notification that says what to choose, instead of an error, and a failure says what to do next instead of pointing to the console
+
 ## [1.1.0] - 2026-09-21
 
 ### Changed

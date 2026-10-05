@@ -1,3 +1,9 @@
+import {
+  showError,
+  showNotice,
+  showSuccess,
+} from "figma-plugin-utilities/lib/figma-helpers";
+import { joinList, plural, UNDO } from "figma-plugin-utilities/lib/format";
 interface GridMetrics {
   roundedColWidth: number;
   calculatedPageWidth: number;
@@ -50,7 +56,9 @@ async function initializePlugin() {
     figma.ui.postMessage({ type: "load-collections", data: collectionData });
   } catch (error) {
     console.error("Error fetching collections:", error);
-    figma.notify("Could not load variable collections.", { error: true });
+    showError(
+      "Couldn't read the variable collections. Reopen the plugin to try again.",
+    );
   }
 }
 initializePlugin();
@@ -109,7 +117,9 @@ figma.ui.onmessage = async (msg) => {
 
     const grid = computeGrid(targetMaxWidth, columns, gutter, margin);
     if (!grid.isValid) {
-      figma.notify("Invalid grid — check your values.", { error: true });
+      showError(
+        "The grid doesn't fit. Check the max width, columns, margin and gutter.",
+      );
       return;
     }
 
@@ -119,13 +129,13 @@ figma.ui.onmessage = async (msg) => {
         .slice(0, 64) || "default";
 
     let createdOrUpdatedVariables: Map<string, Variable> | null = null;
+    // What the run did, for its one notification.
+    const done: string[] = [];
 
     try {
       if (generateVariables) {
         if (!collectionId) {
-          figma.notify("Please select a variable collection to proceed.", {
-            error: true,
-          });
+          showNotice("Choose a collection, then generate.");
           return;
         }
         const collection =
@@ -143,6 +153,9 @@ figma.ui.onmessage = async (msg) => {
         );
 
         createdOrUpdatedVariables = new Map<string, Variable>();
+        let created = 0;
+        let updated = 0;
+        let removed = 0;
 
         const desiredVariables = new Map<string, number>();
         desiredVariables.set("viewport", grid.calculatedPageWidth);
@@ -169,6 +182,7 @@ figma.ui.onmessage = async (msg) => {
             existingVar.setValueForMode(collection.defaultModeId, value);
             existingVar.scopes = scopesFor(name);
             createdOrUpdatedVariables.set(name, existingVar);
+            updated++;
           } else {
             const newVar = figma.variables.createVariable(
               `${sanitizedBreakpoint}/${name}`,
@@ -178,20 +192,21 @@ figma.ui.onmessage = async (msg) => {
             newVar.setValueForMode(collection.defaultModeId, value);
             newVar.scopes = scopesFor(name);
             createdOrUpdatedVariables.set(name, newVar);
+            created++;
           }
         }
 
         for (const [name, variable] of existingVarMap.entries()) {
           if (!desiredVariables.has(name)) {
             variable.remove();
+            removed++;
           }
         }
 
-        figma.notify(
-          existingVariablesInGroup.length > 0
-            ? "Variables synced!"
-            : "Variables created!",
-        );
+        if (created > 0) done.push(`created ${plural(created, "variable")}`);
+        if (updated > 0) done.push(`updated ${plural(updated, "variable")}`);
+        if (removed > 0) done.push(`removed ${plural(removed, "variable")}`);
+        done[done.length - 1] += ` in "${sanitizedBreakpoint}"`;
       }
 
       if (generateFrame) {
@@ -203,13 +218,19 @@ figma.ui.onmessage = async (msg) => {
           gutter,
           roundedColWidth: grid.roundedColWidth,
         });
-        figma.notify("Frame generated!");
+        done.push("created the grid frame");
       }
     } catch (error) {
       console.error("Error during generation:", error);
-      figma.notify("An error occurred. See console for details.", {
-        error: true,
-      });
+      showError(
+        "Couldn't generate the grid. Press Ctrl/Cmd+Z to undo anything half-made, then try again.",
+      );
+      return;
+    }
+
+    if (done.length > 0) {
+      const summary = joinList(done);
+      showSuccess(`${summary[0].toUpperCase()}${summary.slice(1)}. ${UNDO}`);
     }
   }
 };
