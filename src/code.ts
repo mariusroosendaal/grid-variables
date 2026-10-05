@@ -131,6 +131,8 @@ figma.ui.onmessage = async (msg) => {
     let createdOrUpdatedVariables: Map<string, Variable> | null = null;
     // What the run did, for its one notification.
     const done: string[] = [];
+    // Set when the variables were already up to date.
+    let unchanged = "";
 
     try {
       if (generateVariables) {
@@ -179,10 +181,18 @@ figma.ui.onmessage = async (msg) => {
         for (const [name, value] of desiredVariables.entries()) {
           const existingVar = existingVarMap.get(name);
           if (existingVar) {
-            existingVar.setValueForMode(collection.defaultModeId, value);
-            existingVar.scopes = scopesFor(name);
+            const scopes = scopesFor(name);
+            // A rerun with the same values changes nothing, and says so.
+            if (
+              existingVar.valuesByMode[collection.defaultModeId] !== value ||
+              existingVar.scopes.length !== scopes.length ||
+              existingVar.scopes.some((scope) => !scopes.includes(scope))
+            ) {
+              existingVar.setValueForMode(collection.defaultModeId, value);
+              existingVar.scopes = scopes;
+              updated++;
+            }
             createdOrUpdatedVariables.set(name, existingVar);
-            updated++;
           } else {
             const newVar = figma.variables.createVariable(
               `${sanitizedBreakpoint}/${name}`,
@@ -206,7 +216,10 @@ figma.ui.onmessage = async (msg) => {
         if (created > 0) done.push(`created ${plural(created, "variable")}`);
         if (updated > 0) done.push(`updated ${plural(updated, "variable")}`);
         if (removed > 0) done.push(`removed ${plural(removed, "variable")}`);
-        done[done.length - 1] += ` in "${sanitizedBreakpoint}"`;
+        if (done.length > 0)
+          done[done.length - 1] += ` in "${sanitizedBreakpoint}"`;
+        else
+          unchanged = `the variables in "${sanitizedBreakpoint}" already match`;
       }
 
       if (generateFrame) {
@@ -230,7 +243,14 @@ figma.ui.onmessage = async (msg) => {
 
     if (done.length > 0) {
       const summary = joinList(done);
-      showSuccess(`${summary[0].toUpperCase()}${summary.slice(1)}. ${UNDO}`);
+      const note = unchanged
+        ? ` ${unchanged[0].toUpperCase()}${unchanged.slice(1)}.`
+        : "";
+      showSuccess(
+        `${summary[0].toUpperCase()}${summary.slice(1)}.${note} ${UNDO}`,
+      );
+    } else if (unchanged) {
+      showNotice(`Nothing to update: ${unchanged}.`);
     }
   }
 };

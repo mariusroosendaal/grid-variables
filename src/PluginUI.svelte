@@ -67,10 +67,17 @@
     });
   }
 
-  $: generateDisabled = (!generateVariables && !generateFrame) || !gridIsValid;
+  // As code.ts checks them
+  $: needsCollection = generateVariables && !selectedCollection;
+  $: generateDisabled =
+    (!generateVariables && !generateFrame) || !gridIsValid || needsCollection;
   $: tooltipLabel = !gridIsValid
-    ? "Fix grid values before generating"
-    : "Select at least one output option to enable";
+    ? "The grid doesn't fit. Check the max width, columns, margin and gutter."
+    : !generateVariables && !generateFrame
+      ? "Choose an output: a variable collection, a preview frame or both."
+      : hasCollections
+        ? "Choose a collection for the variables."
+        : "Add a variable collection to the file, or turn off Save to variable collection.";
 
   window.onmessage = createMessageHandler({
     "grid-results": (msg) => {

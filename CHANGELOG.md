@@ -5,7 +5,8 @@
 ### Changed
 
 - **Generate** ends with one notification that counts the variables created, updated and removed in the group, and the frame, with the undo shortcut, in place of "Variables created!" and "Frame generated!"
-- Generating without a collection shows a regular notification that says what to choose, instead of an error, and a failure says what to do next instead of pointing to the console
+- A variable whose value and scopes are already right isn't counted as updated, and a run that changes nothing says the variables already match
+- **Generate** stays off until you choose a collection for the variables, and its tooltip says what's missing: a grid that fits, an output or a collection. A failure says what to do next instead of pointing to the console
 
 ## [1.1.0] - 2026-09-21
 
