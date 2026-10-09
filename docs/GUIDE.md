@@ -13,6 +13,6 @@ Grid Variables turns a column grid into number variables and a preview frame, su
 
 Click **Generate** to create the variables, the frame, or both. Press Ctrl/Cmd+Z to undo.
 
-The values go in the collection's default mode, and with both options on, the frame uses them. Only width and height pickers list the `col-` variables, and no picker lists the other four. If the group exists, its variables update in place, so bindings stay. Its other variables are deleted, such as `xl/col-13` from an earlier 16-column grid.
+The values go in the collection's default mode, and with both options on, the frame uses them. Only width and height pickers list the `col-` variables, and no picker lists the other four. If the group exists, its variables update in place, so bindings stay. Columns the grid no longer has are deleted, such as `xl/col-13` from an earlier 16-column grid. Other variables in the group stay.
 
 If **Generate** is disabled, hover it to see why. If **Collection** is disabled, create a variable collection, then open the plugin again.
