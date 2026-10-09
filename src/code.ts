@@ -206,8 +206,10 @@ figma.ui.onmessage = async (msg) => {
           }
         }
 
+        // Only columns the grid no longer has: other variables in the group
+        // belong to the user.
         for (const [name, variable] of existingVarMap.entries()) {
-          if (!desiredVariables.has(name)) {
+          if (/^col-\d+$/.test(name) && !desiredVariables.has(name)) {
             variable.remove();
             removed++;
           }

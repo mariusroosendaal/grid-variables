@@ -8,6 +8,10 @@
 - A variable whose value and scopes are already right isn't counted as updated, and a run that changes nothing says the variables already match
 - **Generate** stays off until you choose a collection for the variables, and its tooltip says what's missing: a grid that fits, an output or a collection. A failure says what to do next instead of pointing to the console
 
+### Fixed
+
+- **Generate** removes only the columns the grid no longer has, and leaves your other variables under the breakpoint's group alone, such as `md/spacing/4`. It used to delete them
+
 ## [1.1.0] - 2026-09-21
 
 ### Changed
