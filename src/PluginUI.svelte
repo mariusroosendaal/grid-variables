@@ -44,10 +44,10 @@
   function calculateGrid() {
     sendToPlugin("calculate-grid", {
       data: {
-        maxWidth: parseInt(maxWidth, 10) || 0,
-        columns: parseInt(columns, 10) || 0,
-        gutter: parseInt(gutter, 10) || 0,
-        margin: parseInt(margin, 10) || 0,
+        maxWidth: parseInt(String(maxWidth), 10) || 0,
+        columns: parseInt(String(columns), 10) || 0,
+        gutter: parseInt(String(gutter), 10) || 0,
+        margin: parseInt(String(margin), 10) || 0,
       },
     });
   }
@@ -57,10 +57,10 @@
       data: {
         collectionId: selectedCollection?.value || "",
         breakpoint: breakpoint || "default",
-        viewport: parseInt(maxWidth, 10) || 0,
-        columns: parseInt(columns, 10) || 0,
-        margin: parseInt(margin, 10) || 0,
-        gutter: parseInt(gutter, 10) || 0,
+        viewport: parseInt(String(maxWidth), 10) || 0,
+        columns: parseInt(String(columns), 10) || 0,
+        margin: parseInt(String(margin), 10) || 0,
+        gutter: parseInt(String(gutter), 10) || 0,
         generateVariables,
         generateFrame,
       },
@@ -103,8 +103,8 @@
   });
 
   // Calculate on mount and when inputs change
-  // Passed as arguments so the statement re-runs on any of them, including 0
-  $: calculateGrid(maxWidth, columns, gutter, margin);
+  // Listed so the statement re-runs on any of them, including 0
+  $: (maxWidth, columns, gutter, margin, calculateGrid());
 
   // Resize plugin window when variables section expands/collapses
   $: {
@@ -229,7 +229,6 @@
       <Button
         variant="primary"
         on:click={handleGenerate}
-        fullWidth
         ariaDisabled={generateDisabled}
       >
         Generate
